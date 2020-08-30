@@ -1,0 +1,1 @@
+# Ave.Extensions.Console.StateManagement
