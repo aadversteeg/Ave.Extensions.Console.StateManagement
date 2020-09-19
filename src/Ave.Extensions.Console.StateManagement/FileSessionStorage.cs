@@ -31,6 +31,10 @@ namespace Ave.Extensions.Console.StateManagement
 
         public void Save(string sessionKey, IDictionary<string, object> sessionState)
         {
+            if (!Directory.Exists(_path))
+            {
+                Directory.CreateDirectory(_path);
+            }
             var sessionFilename = Path.Combine(_path, sessionKey);
 
             var bytes = _sessionStateSerializer.Serialize(sessionState);
