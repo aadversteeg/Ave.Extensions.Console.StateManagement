@@ -1,0 +1,124 @@
+﻿using AutoFixture;
+using Ave.Extensions.Console.StateManagement;
+using FluentAssertions;
+using Moq;
+using System.Collections.Generic;
+using System.IO;
+using Xunit;
+
+namespace UnitTests.Extensions.Console.StateManagement
+{
+    public class FileSessionStorageTests
+    {
+        [Fact(DisplayName = "FSS-001: Should check if file exists with correct path and return empty state because file does not exist.")]
+        public void FSS001()
+        {
+            // arrange
+            var fixture = new Fixture();
+            var sessionKey = fixture.Create<string>();
+            var path = fixture.Create<string>();
+            var expectedPath = Path.Combine(path, sessionKey);
+
+            var sessionStateSerializer = new BinarySessionStateSerializer();
+
+            var fileMock = new Mock<IFile>();
+            fileMock
+                .Setup(m => m.Exists(expectedPath))
+                .Returns(false);
+
+            var storage = new FileSessionStorage(fileMock.Object, sessionStateSerializer, path);
+
+            // act
+            var sessionState = storage.Load(sessionKey);
+
+            // assert
+            sessionState.Should().NotBeNull();
+            sessionState.Count.Should().Be(0);
+
+            fileMock.Verify(m => m.Exists(expectedPath), Times.Once);
+        }
+
+        [Fact(DisplayName = "FSS-002: Should load session state using correct path.")]
+        public void FSS002()
+        {
+            // arrange
+            var fixture = new Fixture();
+            var sessionKey = fixture.Create<string>();
+            var path = fixture.Create<string>();
+            var expectedPath = Path.Combine(path, sessionKey);
+
+            var sessionStateSerializer = new BinarySessionStateSerializer();
+            var sessionState = new Dictionary<string, object>()
+            {
+                { "one", 1 }
+            };
+            var serializedSessionState = sessionStateSerializer.Serialize(sessionState);
+
+            var fileMock = new Mock<IFile>();
+
+            fileMock
+                .Setup(m => m.Exists(expectedPath))
+                .Returns(true);
+
+            fileMock
+                .Setup(m => m.ReadAllBytes(expectedPath))
+                .Returns(serializedSessionState);
+
+            var storage = new FileSessionStorage(fileMock.Object, sessionStateSerializer, path);
+
+            // act
+            var loadedSessionState = storage.Load(sessionKey);
+
+            // assert
+            loadedSessionState.Should().NotBeNull();
+            loadedSessionState.Should().BeEquivalentTo(sessionState);
+
+            fileMock.Verify(m => m.Exists(expectedPath), Times.Once);
+            fileMock.Verify(m => m.ReadAllBytes(expectedPath), Times.Once);
+        }
+
+        [Fact(DisplayName = "FSS-003: Should save session state using correct path.")]
+        public void FSS003()
+        {
+            // arrange
+            var fixture = new Fixture();
+            var sessionKey = fixture.Create<string>();
+            var path = fixture.Create<string>();
+            var expectedPath = Path.Combine(path, sessionKey);
+
+            var sessionStateSerializer = new BinarySessionStateSerializer();
+            var sessionState = new Dictionary<string, object>()
+            {
+                { "one", 1 }
+            };
+            var serializedSessionState = sessionStateSerializer.Serialize(sessionState);
+
+            var fileMock = new Mock<IFile>();
+
+            fileMock
+                .Setup(m => m.Exists(expectedPath))
+                .Returns(true);
+
+            fileMock
+                .Setup(m => m.WriteAllBytes(expectedPath, It.IsAny<byte[]>()))
+                .Callback<string, byte[]>((sessionKey, bytes) => serializedSessionState = bytes);
+
+            var storage = new FileSessionStorage(fileMock.Object, sessionStateSerializer, path);
+
+            // act
+            storage.Save(sessionKey, sessionState);
+
+            // assert
+            fileMock.Verify(m => m.WriteAllBytes(expectedPath, It.IsAny<byte[]>()), Times.Once);
+
+
+            var expectedSessionState = new Dictionary<string, object>()
+            {
+                { "one", 1},
+            };
+
+            var deserializedSessionState = sessionStateSerializer.Deserialize(serializedSessionState);
+            deserializedSessionState.Should().BeEquivalentTo(expectedSessionState);
+        }
+    }
+}

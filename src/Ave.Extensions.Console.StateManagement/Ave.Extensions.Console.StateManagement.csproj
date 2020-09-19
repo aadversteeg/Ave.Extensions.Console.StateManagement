@@ -11,4 +11,8 @@
     <Copyright>Versteeg IT Solutions / Aad Versteeg</Copyright>
   </PropertyGroup>
 
+  <ItemGroup>
+    <PackageReference Include="System.Management" Version="4.7.0" />
+  </ItemGroup>
+
 </Project>
