@@ -5,11 +5,16 @@ namespace Ave.Extensions.Console.StateManagement
     public class StateManager : IStateManager
     {
         private readonly IDictionary<string, object> _state = new Dictionary<string, object>();
+        private readonly string _sessionKey;
+        private readonly ISessionStorage _sessionStorage;
 
-
-        public StateManager(string applicationName)
+        public StateManager(string applicationName, ISession session, ISessionStorage sessionStorage)
         {
             ApplicationName = applicationName;
+            _sessionKey = session.Key;
+            _sessionStorage = sessionStorage;
+
+            _state = _sessionStorage.Load(_sessionKey);
         }
 
         public string ApplicationName { get; }
@@ -38,6 +43,11 @@ namespace Ave.Extensions.Console.StateManagement
             {
                 _state.Add(key, value);
             }
+        }
+
+        public void Save()
+        {
+            _sessionStorage.Save(_sessionKey, _state);
         }
     }
 }
