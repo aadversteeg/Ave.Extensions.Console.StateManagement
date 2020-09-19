@@ -5,12 +5,14 @@ namespace Ave.Extensions.Console.StateManagement
 {
     public class FileSessionStorage : ISessionStorage
     {
-        private IFile _file;
-        private ISessionStateSerializer _sessionStateSerializer;
-        private string _path;
+        private readonly IDirectory _directory;
+        private readonly IFile _file;
+        private readonly ISessionStateSerializer _sessionStateSerializer;
+        private readonly string _path;
 
-        public FileSessionStorage(IFile file, ISessionStateSerializer sessionStateSerializer, string path)
+        public FileSessionStorage(IDirectory directory, IFile file, ISessionStateSerializer sessionStateSerializer, string path)
         {
+            _directory = directory;
             _file = file;
             _sessionStateSerializer = sessionStateSerializer;
             _path = path;
@@ -31,9 +33,9 @@ namespace Ave.Extensions.Console.StateManagement
 
         public void Save(string sessionKey, IDictionary<string, object> sessionState)
         {
-            if (!Directory.Exists(_path))
+            if (!_directory.Exists(_path))
             {
-                Directory.CreateDirectory(_path);
+                _directory.Create(_path);
             }
             var sessionFilename = Path.Combine(_path, sessionKey);
 

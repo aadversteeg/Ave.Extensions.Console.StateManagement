@@ -21,12 +21,14 @@ namespace UnitTests.Extensions.Console.StateManagement
 
             var sessionStateSerializer = new BinarySessionStateSerializer();
 
+            var directoryMock = new Mock<IDirectory>();
+
             var fileMock = new Mock<IFile>();
             fileMock
                 .Setup(m => m.Exists(expectedPath))
                 .Returns(false);
 
-            var storage = new FileSessionStorage(fileMock.Object, sessionStateSerializer, path);
+            var storage = new FileSessionStorage(directoryMock.Object, fileMock.Object, sessionStateSerializer, path);
 
             // act
             var sessionState = storage.Load(sessionKey);
@@ -54,6 +56,8 @@ namespace UnitTests.Extensions.Console.StateManagement
             };
             var serializedSessionState = sessionStateSerializer.Serialize(sessionState);
 
+            var directoryMock = new Mock<IDirectory>();
+
             var fileMock = new Mock<IFile>();
 
             fileMock
@@ -64,7 +68,7 @@ namespace UnitTests.Extensions.Console.StateManagement
                 .Setup(m => m.ReadAllBytes(expectedPath))
                 .Returns(serializedSessionState);
 
-            var storage = new FileSessionStorage(fileMock.Object, sessionStateSerializer, path);
+            var storage = new FileSessionStorage(directoryMock.Object, fileMock.Object, sessionStateSerializer, path);
 
             // act
             var loadedSessionState = storage.Load(sessionKey);
@@ -93,6 +97,8 @@ namespace UnitTests.Extensions.Console.StateManagement
             };
             var serializedSessionState = sessionStateSerializer.Serialize(sessionState);
 
+            var directoryMock = new Mock<IDirectory>();
+
             var fileMock = new Mock<IFile>();
 
             fileMock
@@ -103,7 +109,7 @@ namespace UnitTests.Extensions.Console.StateManagement
                 .Setup(m => m.WriteAllBytes(expectedPath, It.IsAny<byte[]>()))
                 .Callback<string, byte[]>((sessionKey, bytes) => serializedSessionState = bytes);
 
-            var storage = new FileSessionStorage(fileMock.Object, sessionStateSerializer, path);
+            var storage = new FileSessionStorage(directoryMock.Object, fileMock.Object, sessionStateSerializer, path);
 
             // act
             storage.Save(sessionKey, sessionState);
@@ -119,6 +125,58 @@ namespace UnitTests.Extensions.Console.StateManagement
 
             var deserializedSessionState = sessionStateSerializer.Deserialize(serializedSessionState);
             deserializedSessionState.Should().BeEquivalentTo(expectedSessionState);
+        }
+
+        [Fact(DisplayName = "FSS-004: Should create directory on save session state when directory does not exist.")]
+        public void FSS004()
+        {
+            // arrange
+            var fixture = new Fixture();
+            var sessionKey = fixture.Create<string>();
+            var path = fixture.Create<string>();
+            var expectedPath = Path.Combine(path, sessionKey);
+
+            var sessionStateSerializer = new BinarySessionStateSerializer();
+            var sessionState = new Dictionary<string, object>();
+
+            var directoryMock = new Mock<IDirectory>();
+            directoryMock.Setup(m => m.Exists(path))
+                .Returns(false);
+
+            var fileMock = new Mock<IFile>();
+            var storage = new FileSessionStorage(directoryMock.Object, fileMock.Object, sessionStateSerializer, path);
+
+            // act
+            storage.Save(sessionKey, sessionState);
+
+            // assert
+            directoryMock.Verify(m => m.Create(path), Times.Once);
+        }
+
+        [Fact(DisplayName = "FSS-005: Should not create directory on save session state when directory already exists.")]
+        public void FSS005()
+        {
+            // arrange
+            var fixture = new Fixture();
+            var sessionKey = fixture.Create<string>();
+            var path = fixture.Create<string>();
+            var expectedPath = Path.Combine(path, sessionKey);
+
+            var sessionStateSerializer = new BinarySessionStateSerializer();
+            var sessionState = new Dictionary<string, object>();
+
+            var directoryMock = new Mock<IDirectory>();
+            directoryMock.Setup(m => m.Exists(path))
+                .Returns(true);
+
+            var fileMock = new Mock<IFile>();
+            var storage = new FileSessionStorage(directoryMock.Object, fileMock.Object, sessionStateSerializer, path);
+
+            // act
+            storage.Save(sessionKey, sessionState);
+
+            // assert
+            directoryMock.Verify(m => m.Create(path), Times.Never);
         }
     }
 }
