@@ -4,7 +4,7 @@ using System.Management;
 
 namespace Ave.Extensions.Console.StateManagement
 {
-    public class Session
+    public class Session : ISession
     {
         public Session()
         {
