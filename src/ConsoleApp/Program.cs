@@ -9,8 +9,10 @@ namespace ConsoleApp
         {
             // determine root folder for saving session data
             var path = System.IO.Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "SessionState");
-            var sessionStorage = new FileSessionStorage(new SystemDirectory(), new SystemFile(), new BinarySessionStateSerializer(), path);
 
+            var sessionStateSerializer = new SessionStateProtector(new BinarySessionStateSerializer());
+
+            var sessionStorage = new FileSessionStorage(new SystemDirectory(), new SystemFile(), sessionStateSerializer, path);
 
             // create Session for generating correct session key
             var session = new Session();
