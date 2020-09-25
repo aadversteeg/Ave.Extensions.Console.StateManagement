@@ -4,9 +4,9 @@ using System.Management;
 
 namespace Ave.Extensions.Console.StateManagement
 {
-    public class Session : ISession
+    public class SessionManager : ISessionManager
     {
-        public Session()
+        public SessionManager()
         {
             var parentProcessId = GetParentId(Process.GetCurrentProcess());
             Key = parentProcessId.ToString().PadLeft(10, '0');

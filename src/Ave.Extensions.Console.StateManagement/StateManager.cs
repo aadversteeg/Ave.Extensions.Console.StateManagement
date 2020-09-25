@@ -8,7 +8,7 @@ namespace Ave.Extensions.Console.StateManagement
         private readonly string _sessionKey;
         private readonly ISessionStorage _sessionStorage;
 
-        public StateManager(string applicationName, ISession session, ISessionStorage sessionStorage)
+        public StateManager(string applicationName, ISessionManager session, ISessionStorage sessionStorage)
         {
             ApplicationName = applicationName;
             _sessionKey = session.Key;

@@ -18,7 +18,7 @@ namespace UnitTests.Extensions.Console.StateManagement
 
             var sessionKey = fixture.Create<string>();
 
-            var sessionMock = new Mock<ISession>();
+            var sessionMock = new Mock<ISessionManager>();
             sessionMock.Setup(m => m.Key).Returns(sessionKey);
 
             var sessionStorageMock = new Mock<ISessionStorage>();
@@ -42,7 +42,7 @@ namespace UnitTests.Extensions.Console.StateManagement
 
             var sessionKey = fixture.Create<string>();
 
-            var sessionMock = new Mock<ISession>();
+            var sessionMock = new Mock<ISessionManager>();
             sessionMock.Setup(m => m.Key).Returns(sessionKey);
 
             var sessionStorageMock = new Mock<ISessionStorage>();
@@ -67,7 +67,7 @@ namespace UnitTests.Extensions.Console.StateManagement
 
             var sessionKey = fixture.Create<string>();
 
-            var sessionMock = new Mock<ISession>();
+            var sessionMock = new Mock<ISessionManager>();
             sessionMock.Setup(m => m.Key).Returns(sessionKey);
 
             var sessionStorageMock = new Mock<ISessionStorage>();
@@ -92,7 +92,7 @@ namespace UnitTests.Extensions.Console.StateManagement
 
             var sessionKey = fixture.Create<string>();
 
-            var sessionMock = new Mock<ISession>();
+            var sessionMock = new Mock<ISessionManager>();
             sessionMock.Setup(m => m.Key).Returns(sessionKey);
 
             var sessionStorageMock = new Mock<ISessionStorage>();
@@ -116,7 +116,7 @@ namespace UnitTests.Extensions.Console.StateManagement
 
             var sessionKey = fixture.Create<string>();
 
-            var sessionMock = new Mock<ISession>();
+            var sessionMock = new Mock<ISessionManager>();
             sessionMock.Setup(m => m.Key).Returns(sessionKey);
 
             var sessionStorageMock = new Mock<ISessionStorage>();
@@ -142,7 +142,7 @@ namespace UnitTests.Extensions.Console.StateManagement
 
             var sessionKey = fixture.Create<string>();
 
-            var sessionMock = new Mock<ISession>();
+            var sessionMock = new Mock<ISessionManager>();
             sessionMock.Setup(m => m.Key).Returns(sessionKey);
 
             var storedSessionState = new Dictionary<string, object>()
@@ -172,7 +172,7 @@ namespace UnitTests.Extensions.Console.StateManagement
 
             var sessionKey = fixture.Create<string>();
 
-            var sessionMock = new Mock<ISession>();
+            var sessionMock = new Mock<ISessionManager>();
             sessionMock.Setup(m => m.Key).Returns(sessionKey);
 
             var storedSessionState = new Dictionary<string, object>()
