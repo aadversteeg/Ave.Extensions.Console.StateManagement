@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 
 namespace Ave.Extensions.Console.StateManagement
 {
@@ -16,6 +17,21 @@ namespace Ave.Extensions.Console.StateManagement
             _file = file;
             _sessionStateSerializer = sessionStateSerializer;
             _path = path;
+        }
+
+        public IReadOnlyCollection<string> StoredSessions
+        {
+            get
+            {
+                if (!_directory.Exists(_path))
+                {
+                    return new string[0];
+                }
+                return _directory
+                    .GetFileNames(_path)
+                    .Select(fn => Path.GetFileName(fn))
+                    .ToList();
+            }
         }
 
         public IDictionary<string, object> Load(string sessionKey)
@@ -41,6 +57,16 @@ namespace Ave.Extensions.Console.StateManagement
 
             var bytes = _sessionStateSerializer.Serialize(sessionState);
             _file.WriteAllBytes(sessionFilename, bytes);
+        }
+
+        public void Delete(string sessionKey)
+        {
+            var path = Path.Combine(_path, sessionKey);
+            if(_file.Exists(path))
+            {
+                _file.Delete(path);
+            }
+
         }
     }
 }

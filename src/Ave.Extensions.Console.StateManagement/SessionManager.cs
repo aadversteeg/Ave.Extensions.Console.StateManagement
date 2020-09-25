@@ -1,15 +1,23 @@
 ﻿using System;
 using System.Diagnostics;
+using System.Linq;
 using System.Management;
 
 namespace Ave.Extensions.Console.StateManagement
 {
     public class SessionManager : ISessionManager
     {
-        public SessionManager()
+        ISessionStorage _sessionStorage;
+
+
+        public SessionManager(ISessionStorage sessionStorage)
         {
+            _sessionStorage = sessionStorage;
+
             var parentProcessId = GetParentId(Process.GetCurrentProcess());
             Key = parentProcessId.ToString().PadLeft(10, '0');
+
+            PurgeSessions();
         }
 
         private int GetParentId(Process process)
@@ -27,6 +35,21 @@ namespace Ave.Extensions.Console.StateManagement
             }
             return 0;
         }
+
+        private void PurgeSessions()
+        {
+            var runningSessionKeys = Process.GetProcesses().Select(p => p.Id.ToString().PadLeft(10, '0')).ToList();
+
+            var storedSessionKeys = _sessionStorage.StoredSessions;
+            foreach(var storedSessionKey in storedSessionKeys)
+            {
+                if( !runningSessionKeys.Contains(storedSessionKey))
+                {
+                    _sessionStorage.Delete(storedSessionKey);
+                }
+            }
+        }
+
         public string Key { get; }
     }
 }

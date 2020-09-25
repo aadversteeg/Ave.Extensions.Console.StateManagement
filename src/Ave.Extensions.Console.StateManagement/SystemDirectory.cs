@@ -1,4 +1,6 @@
-﻿using System.IO;
+﻿using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 
 namespace Ave.Extensions.Console.StateManagement
 {
@@ -12,6 +14,11 @@ namespace Ave.Extensions.Console.StateManagement
         public void Create(string path)
         {
             Directory.CreateDirectory(path);
+        }
+
+        public IReadOnlyCollection<string> GetFileNames(string path)
+        {
+            return Directory.EnumerateFiles(path).ToList();
         }
     }
 }

@@ -15,7 +15,7 @@ namespace ConsoleApp
             var sessionStorage = new FileSessionStorage(new SystemDirectory(), new SystemFile(), sessionStateSerializer, path);
 
             // create Session for generating correct session key
-            var session = new SessionManager();
+            var session = new SessionManager(sessionStorage);
 
             // create state manager
             var stateManager = new StateManager("SampleApp", session, sessionStorage);

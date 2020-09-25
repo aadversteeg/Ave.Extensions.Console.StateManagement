@@ -8,5 +8,9 @@ namespace Ave.Extensions.Console.StateManagement
         IDictionary<string, object> Load(string sessionKey);
 
         void Save(string sessionKey, IDictionary<string, object> sessionState);
+
+        IReadOnlyCollection<string> StoredSessions { get; }
+
+        void Delete(string sessionKey);
     }
 }

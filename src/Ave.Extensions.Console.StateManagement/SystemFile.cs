@@ -2,6 +2,11 @@
 {
     public class SystemFile : IFile
     {
+        public void Delete(string path)
+        {
+            System.IO.File.Delete(path);
+        }
+
         public bool Exists(string path)
         {
             return System.IO.File.Exists(path);
