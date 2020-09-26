@@ -1,44 +1,26 @@
-﻿using System;
-using System.Diagnostics;
-using System.Linq;
-using System.Management;
+﻿using System.Linq;
 
 namespace Ave.Extensions.Console.StateManagement
 {
     public class SessionManager : ISessionManager
     {
+        IProcessIdProvider _processIdProvider;
         ISessionStorage _sessionStorage;
 
-
-        public SessionManager(ISessionStorage sessionStorage)
+        public SessionManager(ISessionStorage sessionStorage, IProcessIdProvider processIdProvider)
         {
             _sessionStorage = sessionStorage;
+            _processIdProvider = processIdProvider;
 
-            var parentProcessId = GetParentId(Process.GetCurrentProcess());
-            Key = parentProcessId.ToString().PadLeft(10, '0');
+            Key = ToSessionKey(_processIdProvider.ParentProcessId);
 
             PurgeSessions();
         }
 
-        private int GetParentId(Process process)
-        {
-            // query the management system objects
-            string queryText = string.Format("select parentprocessid from win32_process where processid = {0}", process.Id);
-            using (var searcher = new ManagementObjectSearcher(queryText))
-            {
-                foreach (var obj in searcher.Get())
-                {
-                    object data = obj.Properties["parentprocessid"].Value;
-                    if (data != null)
-                        return Convert.ToInt32(data);
-                }
-            }
-            return 0;
-        }
-
         private void PurgeSessions()
         {
-            var runningSessionKeys = Process.GetProcesses().Select(p => p.Id.ToString().PadLeft(10, '0')).ToList();
+            var runningSessionKeys = _processIdProvider.AllProcessIds
+                .Select(p => ToSessionKey(p)).ToList();
 
             var storedSessionKeys = _sessionStorage.StoredSessions;
             foreach(var storedSessionKey in storedSessionKeys)
@@ -48,6 +30,11 @@ namespace Ave.Extensions.Console.StateManagement
                     _sessionStorage.Delete(storedSessionKey);
                 }
             }
+        }
+
+        private string ToSessionKey(int processId)
+        {
+            return processId.ToString().PadLeft(10, '0');
         }
 
         public string Key { get; }
