@@ -5,6 +5,8 @@ namespace Ave.Extensions.Console.StateManagement
 {
     public class SessionManager : ISessionManager
     {
+        private const string UserKey = "user";
+
         private readonly IProcessIdProvider _processIdProvider;
         private readonly ISessionStorage _sessionStorage;
         private readonly string _sessionKey;
@@ -27,7 +29,7 @@ namespace Ave.Extensions.Console.StateManagement
             var storedSessionKeys = _sessionStorage.StoredSessions;
             foreach(var storedSessionKey in storedSessionKeys)
             {
-                if( !runningSessionKeys.Contains(storedSessionKey))
+                if( !runningSessionKeys.Contains(storedSessionKey) && (storedSessionKey != UserKey))
                 {
                     _sessionStorage.Delete(storedSessionKey);
                 }

@@ -101,5 +101,37 @@ namespace UnitTests.Extensions.Console.StateManagement
             var expectedKey = staleProcessId.ToString().PadLeft(10, '0');
             sessionStorageMock.Verify(m => m.Delete(expectedKey));
         }
+
+
+        [Fact(DisplayName = "SM-004: Session manager should not remove user file.")]
+        public void SM004()
+        {
+            // arrange
+            var fixture = new Fixture();
+
+            var allProcessIds = fixture
+                .CreateMany<int>()
+                .ToList();
+
+            var processIdProviderMock = new Mock<IProcessIdProvider>();
+            processIdProviderMock.Setup(m => m.AllProcessIds)
+                .Returns(allProcessIds);
+
+            var staleProcessId = fixture.Create<int>();
+
+            var sessionStorageMock = new Mock<ISessionStorage>();
+            sessionStorageMock.Setup(m => m.StoredSessions)
+                .Returns(allProcessIds
+                    .Select(pid => pid.ToString().PadLeft(10, '0'))
+                    .Concat(new[] { "user" })
+                    .ToList());
+
+            // act
+            var sessionManager = new SessionManager(sessionStorageMock.Object, processIdProviderMock.Object);
+
+            // assert
+            var expectedKey = staleProcessId.ToString().PadLeft(10, '0');
+            sessionStorageMock.Verify(m => m.Delete(It.IsAny<string>()), Times.Never);
+        }
     }
 }
