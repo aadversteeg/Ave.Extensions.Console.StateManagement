@@ -9,3 +9,5 @@ Nuget package for managing state of console application.
 Console applications lose state after terminating. This package enables to preserve state between multiple invocations of a console application in the same console window.
 
 The process id of the parent, ussually the console window, is used as a key to store the state. The state is stored as a binary file. The contents of this file can be protected using the Data Protection API (DPAPI).
+
+State can also be preserved over multiple terminal sessions by using ```StateSope.User```.
