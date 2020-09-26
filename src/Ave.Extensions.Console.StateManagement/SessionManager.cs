@@ -1,18 +1,20 @@
-﻿using System.Linq;
+﻿using System.Collections.Generic;
+using System.Linq;
 
 namespace Ave.Extensions.Console.StateManagement
 {
     public class SessionManager : ISessionManager
     {
-        IProcessIdProvider _processIdProvider;
-        ISessionStorage _sessionStorage;
+        private readonly IProcessIdProvider _processIdProvider;
+        private readonly ISessionStorage _sessionStorage;
+        private readonly string _sessionKey;
 
         public SessionManager(ISessionStorage sessionStorage, IProcessIdProvider processIdProvider)
         {
             _sessionStorage = sessionStorage;
             _processIdProvider = processIdProvider;
 
-            Key = ToSessionKey(_processIdProvider.ParentProcessId);
+            _sessionKey = ToSessionKey(_processIdProvider.ParentProcessId);
 
             PurgeSessions();
         }
@@ -37,6 +39,14 @@ namespace Ave.Extensions.Console.StateManagement
             return processId.ToString().PadLeft(10, '0');
         }
 
-        public string Key { get; }
+        public IDictionary<string, object> Load()
+        {
+            return _sessionStorage.Load(_sessionKey);
+        }
+
+        public void Save(IDictionary<string, object> state)
+        {
+            _sessionStorage.Save(_sessionKey, state);
+        }
     }
 }

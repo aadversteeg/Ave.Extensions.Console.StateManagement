@@ -18,14 +18,13 @@ namespace UnitTests.Extensions.Console.StateManagement
 
             var sessionKey = fixture.Create<string>();
 
-            var sessionMock = new Mock<ISessionManager>();
-            sessionMock.Setup(m => m.Key).Returns(sessionKey);
-
-            var sessionStorageMock = new Mock<ISessionStorage>();
-            sessionStorageMock.Setup(m => m.Load(sessionKey))
+            var sessionManagerMock = new Mock<ISessionManager>();
+            sessionManagerMock.Setup(m => m.Load())
                 .Returns(new Dictionary<string, object>());
 
-            var stateManager = new StateManager("MyApplication", sessionMock.Object, sessionStorageMock.Object);
+            var sessionStorageMock = new Mock<ISessionStorage>();
+
+            var stateManager = new StateManager("MyApplication", sessionManagerMock.Object);
 
             // act
             var applicationName = stateManager.ApplicationName;
@@ -38,18 +37,11 @@ namespace UnitTests.Extensions.Console.StateManagement
         public void SM002()
         {
             // arrange
-            var fixture = new Fixture();
-
-            var sessionKey = fixture.Create<string>();
-
-            var sessionMock = new Mock<ISessionManager>();
-            sessionMock.Setup(m => m.Key).Returns(sessionKey);
-
-            var sessionStorageMock = new Mock<ISessionStorage>();
-            sessionStorageMock.Setup(m => m.Load(sessionKey))
+            var sessionManagerMock = new Mock<ISessionManager>();
+            sessionManagerMock.Setup(m => m.Load())
                 .Returns(new Dictionary<string, object>());
 
-            var stateManager = new StateManager("MyApplication", sessionMock.Object, sessionStorageMock.Object);
+            var stateManager = new StateManager("MyApplication", sessionManagerMock.Object);
 
             // act
             var value = stateManager.GetValue("test", 42);
@@ -62,19 +54,11 @@ namespace UnitTests.Extensions.Console.StateManagement
         public void SM003()
         {
             // arrange
-
-            var fixture = new Fixture();
-
-            var sessionKey = fixture.Create<string>();
-
-            var sessionMock = new Mock<ISessionManager>();
-            sessionMock.Setup(m => m.Key).Returns(sessionKey);
-
-            var sessionStorageMock = new Mock<ISessionStorage>();
-            sessionStorageMock.Setup(m => m.Load(sessionKey))
+            var sessionManagerMock = new Mock<ISessionManager>();
+            sessionManagerMock.Setup(m => m.Load())
                 .Returns(new Dictionary<string, object>());
 
-            var stateManager = new StateManager("MyApplication", sessionMock.Object, sessionStorageMock.Object);
+            var stateManager = new StateManager("MyApplication", sessionManagerMock.Object);
             stateManager.SetValue("test", 123);
 
             // act
@@ -88,18 +72,11 @@ namespace UnitTests.Extensions.Console.StateManagement
         public void SM004()
         {
             // arrange
-            var fixture = new Fixture();
-
-            var sessionKey = fixture.Create<string>();
-
-            var sessionMock = new Mock<ISessionManager>();
-            sessionMock.Setup(m => m.Key).Returns(sessionKey);
-
-            var sessionStorageMock = new Mock<ISessionStorage>();
-            sessionStorageMock.Setup(m => m.Load(sessionKey))
+            var sessionManagerMock = new Mock<ISessionManager>();
+            sessionManagerMock.Setup(m => m.Load())
                 .Returns(new Dictionary<string, object>());
 
-            var stateManager = new StateManager("MyApplication", sessionMock.Object, sessionStorageMock.Object);
+            var stateManager = new StateManager("MyApplication", sessionManagerMock.Object);
 
             // act
             var result = stateManager.HasValueFor("test");
@@ -112,18 +89,11 @@ namespace UnitTests.Extensions.Console.StateManagement
         public void SM005()
         {
             // arrange
-            var fixture = new Fixture();
-
-            var sessionKey = fixture.Create<string>();
-
-            var sessionMock = new Mock<ISessionManager>();
-            sessionMock.Setup(m => m.Key).Returns(sessionKey);
-
-            var sessionStorageMock = new Mock<ISessionStorage>();
-            sessionStorageMock.Setup(m => m.Load(sessionKey))
+            var sessionManagerMock = new Mock<ISessionManager>();
+            sessionManagerMock.Setup(m => m.Load())
                 .Returns(new Dictionary<string, object>());
 
-            var stateManager = new StateManager("MyApplication", sessionMock.Object, sessionStorageMock.Object);
+            var stateManager = new StateManager("MyApplication", sessionManagerMock.Object);
 
             stateManager.SetValue("test", 123);
 
@@ -138,28 +108,22 @@ namespace UnitTests.Extensions.Console.StateManagement
         public void SM006()
         {
             // arrange
-            var fixture = new Fixture();
-
-            var sessionKey = fixture.Create<string>();
-
-            var sessionMock = new Mock<ISessionManager>();
-            sessionMock.Setup(m => m.Key).Returns(sessionKey);
-
             var storedSessionState = new Dictionary<string, object>()
             {
                 { "one", "value one" },
                 { "two", 2 }
             };
 
-            var sessionStorageMock = new Mock<ISessionStorage>();
-            sessionStorageMock.Setup(m => m.Load(sessionKey))
+            var sessionManagerMock = new Mock<ISessionManager>();
+            sessionManagerMock.Setup(m => m.Load())
                 .Returns(storedSessionState);
 
             // act
-            var stateManager = new StateManager("MyApplication", sessionMock.Object, sessionStorageMock.Object);
+            var stateManager = new StateManager("MyApplication", sessionManagerMock.Object);
+
 
             // assert
-            sessionStorageMock.Verify(m => m.Load(sessionKey), Times.Once);
+            sessionManagerMock.Verify(m => m.Load(), Times.Once);
             stateManager.GetValue<string>("one").Should().Be("value one");
             stateManager.GetValue<int>("two").Should().Be(2);
         }
@@ -168,34 +132,29 @@ namespace UnitTests.Extensions.Console.StateManagement
         public void SM007()
         {
             // arrange
-            var fixture = new Fixture();
-
-            var sessionKey = fixture.Create<string>();
-
-            var sessionMock = new Mock<ISessionManager>();
-            sessionMock.Setup(m => m.Key).Returns(sessionKey);
-
             var storedSessionState = new Dictionary<string, object>()
             {
+                { "one", "value one" },
+                { "two", 2 }
             };
 
-            var sessionStorageMock = new Mock<ISessionStorage>();
-            sessionStorageMock.Setup(m => m.Load(sessionKey))
+            var sessionManagerMock = new Mock<ISessionManager>();
+            sessionManagerMock.Setup(m => m.Load())
                 .Returns(storedSessionState);
 
-            IDictionary<string, object> persistedState = null;
+             IDictionary<string, object> persistedState = null;
 
-            sessionStorageMock.Setup(m => m.Save(sessionKey, It.IsAny<IDictionary<string, object>>()))
-                .Callback<string, IDictionary<string, object>>((sessionKey, state) => persistedState = state);
+            sessionManagerMock.Setup(m => m.Save(It.IsAny<IDictionary<string, object>>()))
+                .Callback<IDictionary<string, object>>((state) => persistedState = state);
 
-            var stateManager = new StateManager("MyApplication", sessionMock.Object, sessionStorageMock.Object);
+            var stateManager = new StateManager("MyApplication", sessionManagerMock.Object);
 
             // act
             stateManager.SetValue("One", "Value One");
             stateManager.Save();
 
             // assert
-            sessionStorageMock.Verify(m => m.Save(sessionKey, It.IsAny<IDictionary<string, object>>()), Times.Once);
+            sessionManagerMock.Verify(m => m.Save(It.IsAny<IDictionary<string, object>>()), Times.Once);
 
             persistedState.Should().NotBeNull();
             persistedState.Should().ContainKey("One");

@@ -15,10 +15,10 @@ namespace ConsoleApp
             var sessionStorage = new FileSessionStorage(new SystemDirectory(), new SystemFile(), sessionStateSerializer, path);
 
             // create Session for generating correct session key
-            var session = new SessionManager(sessionStorage, new SystemProcessIdProvider());
+            var sessionMananager = new SessionManager(sessionStorage, new SystemProcessIdProvider());
 
             // create state manager
-            var stateManager = new StateManager("SampleApp", session, sessionStorage);
+            var stateManager = new StateManager("SampleApp", sessionMananager);
 
             if(args.Length == 1)
             {

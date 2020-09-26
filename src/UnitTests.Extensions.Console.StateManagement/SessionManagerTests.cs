@@ -1,7 +1,7 @@
-﻿using System.Linq;
+﻿using System.Collections.Generic;
+using System.Linq;
 using AutoFixture;
 using Ave.Extensions.Console.StateManagement;
-using FluentAssertions;
 using Moq;
 using Xunit;
 
@@ -9,7 +9,7 @@ namespace UnitTests.Extensions.Console.StateManagement
 {
     public class SessionManagerTests
     {
-        [Fact(DisplayName = "SM-001: Sessionkey should be derived from parent process id.")]
+        [Fact(DisplayName = "SM-001: Sessionkey should be derived from parent process id and used while saving.")]
         public void SM001()
         {
             // arrange
@@ -30,17 +30,49 @@ namespace UnitTests.Extensions.Console.StateManagement
 
             var sessionManager = new SessionManager(sessionStorageMock.Object, processIdProviderMock.Object);
 
+            var state = new Dictionary<string, object>();
+
             // act
-            var sessionKey = sessionManager.Key;
+            sessionManager.Save(state);
 
             // assert
             var expectedKey = parentProcessId.ToString().PadLeft(10, '0');
-
-            sessionKey.Should().Be(expectedKey);
+            sessionStorageMock.Verify(m => m.Save(expectedKey, state));
         }
 
-        [Fact(DisplayName = "SM-002: Session manager should remove all stale sessions.")]
+        [Fact(DisplayName = "SM-002: Sessionkey should be derived from parent process id and used while loading.")]
         public void SM002()
+        {
+            // arrange
+            var fixture = new Fixture();
+
+            var parentProcessId = fixture.Create<int>();
+
+            var processIdProviderMock = new Mock<IProcessIdProvider>();
+            processIdProviderMock.Setup(m => m.ParentProcessId)
+                .Returns(parentProcessId);
+
+            processIdProviderMock.Setup(m => m.AllProcessIds)
+                .Returns(fixture.CreateMany<int>().ToList());
+
+            var sessionStorageMock = new Mock<ISessionStorage>();
+            sessionStorageMock.Setup(m => m.StoredSessions)
+                .Returns(fixture.CreateMany<int>().Select(pid => pid.ToString().PadLeft(10, '0')).ToList());
+
+            var sessionManager = new SessionManager(sessionStorageMock.Object, processIdProviderMock.Object);
+
+            var state = new Dictionary<string, object>();
+
+            // act
+            var loadState = sessionManager.Load();
+
+            // assert
+            var expectedKey = parentProcessId.ToString().PadLeft(10, '0');
+            sessionStorageMock.Verify(m => m.Load(expectedKey));
+        }
+
+        [Fact(DisplayName = "SM-003: Session manager should remove all stale sessions.")]
+        public void SM003()
         {
             // arrange
             var fixture = new Fixture();
