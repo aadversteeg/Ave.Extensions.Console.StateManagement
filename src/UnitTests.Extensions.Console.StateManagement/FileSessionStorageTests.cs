@@ -4,6 +4,7 @@ using FluentAssertions;
 using Moq;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using Xunit;
 
 namespace UnitTests.Extensions.Console.StateManagement
@@ -177,6 +178,96 @@ namespace UnitTests.Extensions.Console.StateManagement
 
             // assert
             directoryMock.Verify(m => m.Create(path), Times.Never);
+        }
+
+
+        [Fact(DisplayName = "FSS-006: Should delete correct file when it exists when deleting session.")]
+        public void FSS006()
+        {
+            // arrange
+            var fixture = new Fixture();
+            var sessionKey = fixture.Create<string>();
+            var path = fixture.Create<string>();
+            var filePath = Path.Combine(path, sessionKey);
+
+            var sessionStateSerializer = new BinarySessionStateSerializer();
+            var sessionState = new Dictionary<string, object>();
+
+            var directoryMock = new Mock<IDirectory>();
+
+            var fileMock = new Mock<IFile>();
+            fileMock.Setup(m => m.Exists(filePath))
+                .Returns(true);
+            
+            var storage = new FileSessionStorage(directoryMock.Object, fileMock.Object, sessionStateSerializer, path);
+
+            // act
+            storage.Delete(sessionKey);
+
+            // assert
+            fileMock.Verify(m => m.Delete(filePath), Times.Once);
+        }
+
+
+        [Fact(DisplayName = "FSS-007: Should not delete file when it does not exists when deleting session.")]
+        public void FSS007()
+        {
+            // arrange
+            var fixture = new Fixture();
+            var sessionKey = fixture.Create<string>();
+            var path = fixture.Create<string>();
+            var filePath = Path.Combine(path, sessionKey);
+
+            var sessionStateSerializer = new BinarySessionStateSerializer();
+            var sessionState = new Dictionary<string, object>();
+
+            var directoryMock = new Mock<IDirectory>();
+
+            var fileMock = new Mock<IFile>();
+            fileMock.Setup(m => m.Exists(filePath))
+                .Returns(false);
+
+            var storage = new FileSessionStorage(directoryMock.Object, fileMock.Object, sessionStateSerializer, path);
+
+            // act
+            storage.Delete(sessionKey);
+
+            // assert
+            fileMock.Verify(m => m.Delete(filePath), Times.Never);
+        }
+
+        [Fact(DisplayName = "FSS-008: Should return all files as session keys.")]
+        public void FSS008()
+        {
+            // arrange
+            var fixture = new Fixture();
+            var sessionKeys = fixture.CreateMany<string>(2);
+            var path = fixture.Create<string>();
+            var filePaths = sessionKeys
+                .Select( sessionKey => Path.Combine(path, sessionKey))
+                .ToList();
+
+            var sessionStateSerializer = new BinarySessionStateSerializer();
+            var sessionState = new Dictionary<string, object>();
+
+            var directoryMock = new Mock<IDirectory>();
+            directoryMock
+                .Setup(m => m.Exists(path))
+                .Returns(true);
+
+            directoryMock
+                .Setup(m => m.GetFileNames(path))
+                .Returns(filePaths);
+
+            var fileMock = new Mock<IFile>();
+
+            var storage = new FileSessionStorage(directoryMock.Object, fileMock.Object, sessionStateSerializer, path);
+
+            // act
+            var storedSessions = storage.StoredSessions;
+
+            // assert
+            storedSessions.Should().BeEquivalentTo(sessionKeys);
         }
     }
 }
