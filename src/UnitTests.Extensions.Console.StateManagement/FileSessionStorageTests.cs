@@ -1,10 +1,10 @@
-﻿using AutoFixture;
+﻿using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using AutoFixture;
 using Ave.Extensions.Console.StateManagement;
 using FluentAssertions;
 using Moq;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
 using Xunit;
 
 namespace UnitTests.Extensions.Console.StateManagement
@@ -241,7 +241,7 @@ namespace UnitTests.Extensions.Console.StateManagement
         {
             // arrange
             var fixture = new Fixture();
-            var sessionKeys = fixture.CreateMany<string>(2);
+            var sessionKeys = fixture.CreateMany<string>();
             var path = fixture.Create<string>();
             var filePaths = sessionKeys
                 .Select( sessionKey => Path.Combine(path, sessionKey))
