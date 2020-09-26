@@ -18,7 +18,7 @@ namespace ConsoleApp
             var sessionMananager = new SessionManager(sessionStorage, new SystemProcessIdProvider());
 
             // create state manager
-            var stateManager = new StateManager("SampleApp", sessionMananager);
+            var stateManager = new StateManager(sessionMananager);
 
             if(args.Length == 1)
             {

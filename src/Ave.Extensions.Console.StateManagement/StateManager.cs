@@ -7,15 +7,11 @@ namespace Ave.Extensions.Console.StateManagement
         private readonly IDictionary<string, object> _state = new Dictionary<string, object>();
         private readonly ISessionManager _sessionManager;
 
-        public StateManager(string applicationName, ISessionManager sessionManager)
+        public StateManager(ISessionManager sessionManager)
         {
-            ApplicationName = applicationName;
             _sessionManager = sessionManager;
-
             _state = _sessionManager.Load();
         }
-
-        public string ApplicationName { get; }
 
         public bool HasValueFor(string key)
         {
