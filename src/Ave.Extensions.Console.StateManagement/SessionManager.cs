@@ -41,14 +41,25 @@ namespace Ave.Extensions.Console.StateManagement
             return processId.ToString().PadLeft(10, '0');
         }
 
-        public IDictionary<string, object> Load()
+        public IDictionary<string, object> Load(StateScope scope)
         {
-            return _sessionStorage.Load(_sessionKey);
+            if (scope == StateScope.Session)
+            {
+                return _sessionStorage.Load(_sessionKey);
+            }
+            return _sessionStorage.Load(UserKey);
         }
 
-        public void Save(IDictionary<string, object> state)
+        public void Save(StateScope scope, IDictionary<string, object> state)
         {
-            _sessionStorage.Save(_sessionKey, state);
+            if (scope == StateScope.Session)
+            {
+                _sessionStorage.Save(_sessionKey, state);
+            }
+            else
+            {
+                _sessionStorage.Save(UserKey, state);
+            }
         }
     }
 }

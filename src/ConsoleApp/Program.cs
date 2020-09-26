@@ -20,17 +20,19 @@ namespace ConsoleApp
             // create state manager
             var stateManager = new StateManager(sessionMananager);
 
-            if(args.Length == 1)
+            if(args.Length == 2)
             {
                 // read a value from state
-                Console.WriteLine($"Value for {args[0]} : {stateManager.GetValue<string>( args[0], "")}");
+                var scope = Enum.Parse<StateScope>(args[0]);
+                Console.WriteLine($"Value for {args[1]} : {stateManager.GetValue<string>(scope, args[1], "")}");
             } 
-            else if(args.Length == 2)
+            else if(args.Length == 3)
             {
                 // set a value to state
-                stateManager.SetValue(args[0], args[1]);
+                var scope = Enum.Parse<StateScope>(args[0]);
+                stateManager.SetValue(scope, args[1], args[2]);
                 stateManager.Save();
-                Console.WriteLine($"Setting value for {args[0]} to {args[1]}");
+                Console.WriteLine($"Setting value for {args[1]} to {args[2]}");
             }
         }
     }

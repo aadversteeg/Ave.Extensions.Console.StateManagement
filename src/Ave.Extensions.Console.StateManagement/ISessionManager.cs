@@ -4,8 +4,8 @@ namespace Ave.Extensions.Console.StateManagement
 {
     public interface ISessionManager
     {
-        IDictionary<string, object> Load();
+        IDictionary<string, object> Load(StateScope scope);
 
-        void Save(IDictionary<string, object> state);
+        void Save(StateScope scope, IDictionary<string, object> state);
     }
 }

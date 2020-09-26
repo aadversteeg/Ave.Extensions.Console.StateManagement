@@ -1,5 +1,4 @@
-﻿using AutoFixture;
-using Ave.Extensions.Console.StateManagement;
+﻿using Ave.Extensions.Console.StateManagement;
 using FluentAssertions;
 using Moq;
 using System.Collections.Generic;
@@ -14,13 +13,13 @@ namespace UnitTests.Extensions.Console.StateManagement
         {
             // arrange
             var sessionManagerMock = new Mock<ISessionManager>();
-            sessionManagerMock.Setup(m => m.Load())
+            sessionManagerMock.Setup(m => m.Load(StateScope.Session))
                 .Returns(new Dictionary<string, object>());
 
             var stateManager = new StateManager(sessionManagerMock.Object);
 
             // act
-            var value = stateManager.GetValue("test", 42);
+            var value = stateManager.GetValue(StateScope.Session, "test", 42);
 
             // assert
             value.Should().Be(42);
@@ -31,14 +30,14 @@ namespace UnitTests.Extensions.Console.StateManagement
         {
             // arrange
             var sessionManagerMock = new Mock<ISessionManager>();
-            sessionManagerMock.Setup(m => m.Load())
+            sessionManagerMock.Setup(m => m.Load(StateScope.Session))
                 .Returns(new Dictionary<string, object>());
 
             var stateManager = new StateManager(sessionManagerMock.Object);
-            stateManager.SetValue("test", 123);
+            stateManager.SetValue(StateScope.Session, "test", 123);
 
             // act
-            var value = stateManager.GetValue("test", 42);
+            var value = stateManager.GetValue(StateScope.Session, "test", 42);
 
             // assert
             value.Should().Be(123);
@@ -49,13 +48,13 @@ namespace UnitTests.Extensions.Console.StateManagement
         {
             // arrange
             var sessionManagerMock = new Mock<ISessionManager>();
-            sessionManagerMock.Setup(m => m.Load())
+            sessionManagerMock.Setup(m => m.Load(StateScope.Session))
                 .Returns(new Dictionary<string, object>());
 
             var stateManager = new StateManager(sessionManagerMock.Object);
 
             // act
-            var result = stateManager.HasValueFor("test");
+            var result = stateManager.HasValueFor(StateScope.Session, "test");
 
             // assert
             result.Should().BeFalse();
@@ -66,15 +65,15 @@ namespace UnitTests.Extensions.Console.StateManagement
         {
             // arrange
             var sessionManagerMock = new Mock<ISessionManager>();
-            sessionManagerMock.Setup(m => m.Load())
+            sessionManagerMock.Setup(m => m.Load(StateScope.Session))
                 .Returns(new Dictionary<string, object>());
 
             var stateManager = new StateManager(sessionManagerMock.Object);
 
-            stateManager.SetValue("test", 123);
+            stateManager.SetValue(StateScope.Session, "test", 123);
 
             // act
-            var result = stateManager.HasValueFor("test");
+            var result = stateManager.HasValueFor(StateScope.Session, "test");
 
             // assert
             result.Should().BeTrue();
@@ -91,7 +90,7 @@ namespace UnitTests.Extensions.Console.StateManagement
             };
 
             var sessionManagerMock = new Mock<ISessionManager>();
-            sessionManagerMock.Setup(m => m.Load())
+            sessionManagerMock.Setup(m => m.Load(StateScope.Session))
                 .Returns(storedSessionState);
 
             // act
@@ -99,9 +98,9 @@ namespace UnitTests.Extensions.Console.StateManagement
 
 
             // assert
-            sessionManagerMock.Verify(m => m.Load(), Times.Once);
-            stateManager.GetValue<string>("one").Should().Be("value one");
-            stateManager.GetValue<int>("two").Should().Be(2);
+            sessionManagerMock.Verify(m => m.Load(StateScope.Session), Times.Once);
+            stateManager.GetValue<string>(StateScope.Session, "one").Should().Be("value one");
+            stateManager.GetValue<int>(StateScope.Session, "two").Should().Be(2);
         }
 
         [Fact(DisplayName = "SMN-006: StateManager should save state using provided session key.")]
@@ -115,22 +114,22 @@ namespace UnitTests.Extensions.Console.StateManagement
             };
 
             var sessionManagerMock = new Mock<ISessionManager>();
-            sessionManagerMock.Setup(m => m.Load())
+            sessionManagerMock.Setup(m => m.Load(StateScope.Session))
                 .Returns(storedSessionState);
 
              IDictionary<string, object> persistedState = null;
 
-            sessionManagerMock.Setup(m => m.Save(It.IsAny<IDictionary<string, object>>()))
-                .Callback<IDictionary<string, object>>((state) => persistedState = state);
+            sessionManagerMock.Setup(m => m.Save(StateScope.Session, It.IsAny<IDictionary<string, object>>()))
+                .Callback<StateScope, IDictionary<string, object>>((scope, state) => persistedState = state);
 
             var stateManager = new StateManager(sessionManagerMock.Object);
 
             // act
-            stateManager.SetValue("One", "Value One");
+            stateManager.SetValue(StateScope.Session, "One", "Value One");
             stateManager.Save();
 
             // assert
-            sessionManagerMock.Verify(m => m.Save(It.IsAny<IDictionary<string, object>>()), Times.Once);
+            sessionManagerMock.Verify(m => m.Save(StateScope.Session, It.IsAny<IDictionary<string, object>>()), Times.Once);
 
             persistedState.Should().NotBeNull();
             persistedState.Should().ContainKey("One");

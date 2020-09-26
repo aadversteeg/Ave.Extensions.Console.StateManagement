@@ -4,44 +4,52 @@ namespace Ave.Extensions.Console.StateManagement
 {
     public class StateManager : IStateManager
     {
-        private readonly IDictionary<string, object> _state = new Dictionary<string, object>();
+        private readonly IDictionary<string, object> _sessionState = new Dictionary<string, object>();
+        private readonly IDictionary<string, object> _userState = new Dictionary<string, object>();
+
         private readonly ISessionManager _sessionManager;
 
         public StateManager(ISessionManager sessionManager)
         {
             _sessionManager = sessionManager;
-            _state = _sessionManager.Load();
+
+            _sessionState = _sessionManager.Load(StateScope.Session);
+            _userState = _sessionManager.Load(StateScope.User);
         }
 
-        public bool HasValueFor(string key)
+        public bool HasValueFor(StateScope scope, string key)
         {
-            return _state.ContainsKey(key);
+            var state = scope == StateScope.Session ? _sessionState : _userState;
+            return state.ContainsKey(key);
         }
 
-        public T GetValue<T>(string key, T defaultValue = default)
+        public T GetValue<T>(StateScope scope, string key, T defaultValue = default)
         {
-            if(_state.ContainsKey(key))
+            var state = scope == StateScope.Session ? _sessionState : _userState;
+            if (state.ContainsKey(key))
             {
-                return (T) _state[key];
+                return (T) state[key];
             }
             return defaultValue;
         }
 
-        public void SetValue<T>(string key, T value)
+        public void SetValue<T>(StateScope scope, string key, T value)
         {
-            if( _state.ContainsKey(key))
+            var state = scope == StateScope.Session ? _sessionState : _userState;
+            if (state.ContainsKey(key))
             {
-                _state[key] = value;
+                state[key] = value;
             }
             else
             {
-                _state.Add(key, value);
+                state.Add(key, value);
             }
         }
 
         public void Save()
         {
-            _sessionManager.Save(_state);
+            _sessionManager.Save(StateScope.Session, _sessionState);
+            _sessionManager.Save(StateScope.User, _userState);
         }
     }
 }

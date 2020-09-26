@@ -2,10 +2,10 @@
 {
     public interface IStateManager
     {
-        bool HasValueFor(string key);
+        bool HasValueFor(StateScope scope, string key);
 
-        T GetValue<T>(string key, T defaultValue = default(T));
+        T GetValue<T>(StateScope scope, string key, T defaultValue = default(T));
 
-        void SetValue<T>(string key, T value);
+        void SetValue<T>(StateScope scope, string key, T value);
     }
 }

@@ -33,7 +33,7 @@ namespace UnitTests.Extensions.Console.StateManagement
             var state = new Dictionary<string, object>();
 
             // act
-            sessionManager.Save(state);
+            sessionManager.Save(StateScope.Session, state);
 
             // assert
             var expectedKey = parentProcessId.ToString().PadLeft(10, '0');
@@ -64,7 +64,7 @@ namespace UnitTests.Extensions.Console.StateManagement
             var state = new Dictionary<string, object>();
 
             // act
-            var loadState = sessionManager.Load();
+            var loadState = sessionManager.Load(StateScope.Session);
 
             // assert
             var expectedKey = parentProcessId.ToString().PadLeft(10, '0');
