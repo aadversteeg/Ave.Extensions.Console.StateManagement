@@ -10,4 +10,14 @@ Console applications lose state after terminating. This package enables to prese
 
 The process id of the parent, ussually the console window, is used as a key to store the state. The state is stored as a binary file. The contents of this file can be protected using the Data Protection API (DPAPI).
 
-State can also be preserved over multiple terminal sessions by using ```StateSope.User```.
+## StateScope
+
+Values can be saved ore retrieved using state scope ```user``` or ```session```.
+
+## Session
+
+Values are stored using the parent process id as key. As long as the terminal window is open, stored values are available.
+
+## User
+
+Values are stored using a fixed key. The values are available in all open terminal windows and are preserved after all terminal windows are closed. It as assumed that the path used for ```FileSessionStorage``` is only used by the current user.
